@@ -6,7 +6,7 @@ on:
       apk_url:
         description: "URL to download YouTube APK"
         required: true
-        default: "https://d.apkpure.com/b/APK/com.google.android.youtube?versionCode=1549669824"
+        default: "https://eb5e7388c3df147b74dd2379b7cf8323.r2.cloudflarestorage.com/downloadprod/wp-content/uploads/2024/11/16/6746a64a31380/com.google.android.youtube_19.46.42-1549669824_minAPI26%28arm64-v8a%2Carmeabi-v7a%2Cx86%2Cx86_64%29%28nodpi%29_apkmirror.com.apk?X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=72a5ba3a0b8a601e535d5525f12f8177%2F20241128%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20241128T170825Z&X-Amz-SignedHeaders=host&X-Amz-Expires=3600&X-Amz-Signature=e96e923e16836b238c766cd0a853f29c8c9523edfc0b918105fc97974e5d88a8"
       release_tag:
         description: "Tag for the release (e.g., v1.0.0)"
         required: true
