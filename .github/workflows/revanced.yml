@@ -1,5 +1,7 @@
 name: Patch YouTube ReVanced
 
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 on:
   workflow_dispatch:
     inputs:
