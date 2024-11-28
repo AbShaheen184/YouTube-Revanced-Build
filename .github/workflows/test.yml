@@ -1,0 +1,26 @@
+name: Test Bash Script on Ubuntu
+
+on:
+  push:
+    branches:
+      - main  # Change this to your branch, e.g., 'master'
+  pull_request:
+    branches:
+      - main  # Change this to your branch, e.g., 'master'
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest  # This will use the latest Ubuntu runner
+    
+    steps:
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Make the script executable (if it's not already executable)
+      - name: Make script executable
+        run: chmod +x script.sh
+
+      # Run the Bash script
+      - name: Run the script
+        run: ./script.sh
