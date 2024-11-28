@@ -2,16 +2,13 @@ name: Patch YouTube ReVanced
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 on:
   workflow_dispatch:
     inputs:
       apk_url:
         description: "URL to download YouTube APK"
-        required: true
-        default: "https://files.catbox.moe/sbx1sg.apk"
-      release_tag:
-        description: "Tag for the release (e.g., v1.0.0)"
-        required: true
+        required: false
 
 jobs:
   build:
@@ -21,6 +18,16 @@ jobs:
       # Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v3
+
+      # Run update_links.sh script
+      - name: Update Links
+        run: |
+          chmod +x scripts/update_links.sh
+          ./scripts/update_links.sh
+
+      # Source updated environment variables
+      - name: Source Updated URLs
+        run: source .env
 
       # Set up Java environment
       - name: Set up JDK 17
@@ -32,18 +39,18 @@ jobs:
       # Download ReVanced CLI
       - name: Download ReVanced CLI
         run: |
-          wget https://github.com/ReVanced/revanced-cli/releases/download/v5.0.0-dev.11/revanced-cli-5.0.0-dev.11-all.jar -O revanced-cli.jar
+          wget $CLI_URL -O revanced-cli.jar
 
       # Download Patches and Integrations
       - name: Download Patches and Integrations
         run: |
-          wget https://github.com/ReVanced/revanced-patches/releases/download/v5.2.0/patches-5.2.0.rvp -O revanced-patches.jar
-          wget https://github.com/ReVanced/revanced-integrations/releases/download/v1.16.0/revanced-integrations-1.16.0.apk -O integrations.apk
+          wget $PATCHES_URL -O revanced-patches.jar
+          wget $INTEGRATION_URL -O integrations.apk
 
-      # Download YouTube APK (from input)
+      # Download YouTube APK
       - name: Download YouTube APK
         run: |
-          wget ${{ github.event.inputs.apk_url }} -O youtube.apk
+          wget ${{ github.event.inputs.apk_url || env.YOUTUBE_URL }} -O youtube.apk
 
       # Patch YouTube APK
       - name: Patch YouTube
