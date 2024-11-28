@@ -20,3 +20,8 @@ echo "CLI_URL=$CLI_URL" > .env
 echo "PATCHES_URL=$PATCHES_URL" >> .env
 echo "INTEGRATION_URL=$INTEGRATION_URL" >> .env
 echo "YOUTUBE_URL=$YOUTUBE_URL" >> .env
+
+echo $CLI_URL
+echo $PATCHES_URL
+echo $INTEGRATION_URL
+echo $YOUTUBE_URL
