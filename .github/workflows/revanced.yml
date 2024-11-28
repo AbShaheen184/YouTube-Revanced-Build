@@ -30,13 +30,13 @@ jobs:
       # Download ReVanced CLI
       - name: Download ReVanced CLI
         run: |
-          wget https://github.com/ReVanced/revanced-cli/releases/latest/download/revanced-cli.jar -O revanced-cli.jar
+          wget https://github.com/ReVanced/revanced-cli/releases/download/v5.0.0-dev.11/revanced-cli-5.0.0-dev.11-all.jar -O revanced-cli.jar
 
       # Download Patches and Integrations
       - name: Download Patches and Integrations
         run: |
-          wget https://github.com/ReVanced/revanced-patches/releases/latest/download/revanced-patches.jar -O revanced-patches.jar
-          wget https://github.com/ReVanced/revanced-integrations/releases/latest/download/app-release-unsigned.apk -O integrations.apk
+          wget https://github.com/ReVanced/revanced-patches/releases/download/v5.2.0/patches-5.2.0.rvp -O revanced-patches.jar
+          wget https://github.com/ReVanced/revanced-integrations/releases/download/v1.16.0/revanced-integrations-1.16.0.apk -O integrations.apk
 
       # Download YouTube APK (from input)
       - name: Download YouTube APK
