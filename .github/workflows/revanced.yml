@@ -28,9 +28,11 @@ jobs:
           distribution: 'temurin'
 
       # Download ReVanced CLI
+      
       - name: Download ReVanced CLI
         run: |
-          wget https://github.com/ReVanced/revanced-cli/releases/latest/download/revanced-cli.jar -O revanced-cli.jar
+          LATEST_VERSION=$(curl -s https://api.github.com/repos/ReVanced/revanced-cli/releases/latest | grep '"tag_name":' | cut -d '"' -f 4)
+          wget https://github.com/ReVanced/revanced-cli/releases/download/$LATEST_VERSION/revanced-cli.jar -O revanced-cli.jar
 
       # Download Patches and Integrations
       - name: Download Patches and Integrations
