@@ -2,8 +2,14 @@ name: Patch YouTube ReVanced
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '0 2 * * *' # Runs daily at 2:00 AM UTC
+    inputs:
+      apk_url:
+        description: "URL to download YouTube APK"
+        required: true
+        default: "https://www.apkmirror.com/wp-content/themes/APKMirror/download.php?id=7758988&key=0698aee15cccd3b93909e30bdb00122a417f1a75&forcebaseapk=true"
+      release_tag:
+        description: "Tag for the release (e.g., v1.0.0)"
+        required: true
 
 jobs:
   build:
@@ -32,10 +38,10 @@ jobs:
           wget https://github.com/ReVanced/revanced-patches/releases/latest/download/revanced-patches.jar -O revanced-patches.jar
           wget https://github.com/ReVanced/revanced-integrations/releases/latest/download/app-release-unsigned.apk -O integrations.apk
 
-      # Download YouTube APK
+      # Download YouTube APK (from input)
       - name: Download YouTube APK
         run: |
-          wget https://www.apkmirror.com/wp-content/themes/APKMirror/download.php?id=7758988&key=0698aee15cccd3b93909e30bdb00122a417f1a75&forcebaseapk=true -O youtube.apk
+          wget ${{ github.event.inputs.apk_url }} -O youtube.apk
 
       # Patch YouTube APK
       - name: Patch YouTube
@@ -46,9 +52,23 @@ jobs:
             -a youtube.apk \
             -o youtube-revanced.apk
 
-      # Upload Patched APK as an artifact
-      - name: Upload APK
-        uses: actions/upload-artifact@v3
+      # Create a GitHub Release
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
         with:
-          name: youtube-revanced
-          path: youtube-revanced.apk
+          tag_name: ${{ github.event.inputs.release_tag }}
+          release_name: "ReVanced YouTube Build - ${{ github.event.inputs.release_tag }}"
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Upload APK to the Release
+      - name: Upload APK to Release
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: youtube-revanced.apk
+          asset_name: youtube-revanced-${{ github.event.inputs.release_tag }}.apk
+          asset_content_type: application/vnd.android.package-archive
