@@ -6,7 +6,7 @@ on:
       apk_url:
         description: "URL to download YouTube APK"
         required: true
-        default: "https://dw.uptodown.net/dwn/hrCxp4-Fn7gLw6BwT9RSLdrb9jaRK7PWydZ7Qax3jIXKWXKJFIyS4SejhH0vuf_aQHKpezP0q5ZOYYGoX5wSGZ1yd9LPJW5I3fBeGeouR30YujibbivsZ37jITnKIkzM/h4hNmnz8lk9OYVCztsn7tjOwon6ua6F3FO6Nv5k5RTuDTUsfJF8bsW4kg-CaJJmCrQDml1Lga6CmX6EsuH9mNZ_d9rSTUsqQm0zqC6a_nNymHOVRR_aclQAvy5xMjoJU/uuB63xTXAfZ36-qlJcgs38zfXU0BI-5mJW5c_dmdrz-KWb7R2-xBu_va8xgygfoC6M2CztKRfuJoVXczBVEbKQ==/youtube-19-47-39.apk"
+        default: "https://files.catbox.moe/sbx1sg.apk"
       release_tag:
         description: "Tag for the release (e.g., v1.0.0)"
         required: true
