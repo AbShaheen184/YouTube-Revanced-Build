@@ -1,94 +1,74 @@
-name: Automate YouTube ReVanced APK
+name: Patch YouTube ReVanced
 
 on:
   workflow_dispatch:
+    inputs:
+      apk_url:
+        description: "URL to download YouTube APK"
+        required: true
+        default: "https://dw.uptodown.net/dwn/hrCxp4-Fn7gLw6BwT9RSLdrb9jaRK7PWydZ7Qax3jIXKWXKJFIyS4SejhH0vuf_aQHKpezP0q5ZOYYGoX5wSGZ1yd9LPJW5I3fBeGeouR30YujibbivsZ37jITnKIkzM/h4hNmnz8lk9OYVCztsn7tjOwon6ua6F3FO6Nv5k5RTuDTUsfJF8bsW4kg-CaJJmCrQDml1Lga6CmX6EsuH9mNZ_d9rSTUsqQm0zqC6a_nNymHOVRR_aclQAvy5xMjoJU/uuB63xTXAfZ36-qlJcgs38zfXU0BI-5mJW5c_dmdrz-KWb7R2-xBu_va8xgygfoC6M2CztKRfuJoVXczBVEbKQ==/youtube-19-47-39.apk"
+      release_tag:
+        description: "Tag for the release (e.g., v1.0.0)"
+        required: true
 
 jobs:
-  patch-and-publish:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v3
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Install Dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y python3 python3-pip
-        pip install beautifulsoup4 requests
+      # Set up Java environment
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
 
-    - name: Fetch Latest YouTube APK
-      run: |
-        # Run Python script to get the latest APK URL
-        python3 <<EOF
-        import requests
-        from bs4 import BeautifulSoup
+      # Download ReVanced CLI
+      - name: Download ReVanced CLI
+        run: |
+          wget https://github.com/ReVanced/revanced-cli/releases/latest/download/revanced-cli.jar -O revanced-cli.jar
 
-        def get_latest_youtube_apk_url():
-            base_url = "https://www.apkmirror.com/apk/google-inc/youtube/"
-            response = requests.get(base_url)
+      # Download Patches and Integrations
+      - name: Download Patches and Integrations
+        run: |
+          wget https://github.com/ReVanced/revanced-patches/releases/latest/download/revanced-patches.jar -O revanced-patches.jar
+          wget https://github.com/ReVanced/revanced-integrations/releases/latest/download/app-release-unsigned.apk -O integrations.apk
 
-            if response.status_code == 200:
-                soup = BeautifulSoup(response.content, 'html.parser')
+      # Download YouTube APK (from input)
+      - name: Download YouTube APK
+        run: |
+          wget ${{ github.event.inputs.apk_url }} -O youtube.apk
 
-                latest_version = soup.find('a', class_='fontBlack')
-                if latest_version:
-                    latest_version_url = "https://www.apkmirror.com" + latest_version['href']
-                    print(f"Latest YouTube version page: {latest_version_url}")
-
-                    version_response = requests.get(latest_version_url)
-                    if version_response.status_code == 200:
-                        version_soup = BeautifulSoup(version_response.content, 'html.parser')
-                        
-                        download_link = version_soup.find('a', text="Download APK")
-                        if download_link:
-                            download_url = "https://www.apkmirror.com" + download_link['href']
-                            print(f"Download URL: {download_url}")
-                            return download_url
-                        else:
-                            print("No download link found.")
-                else:
-                    print("No latest version link found.")
-            return None
-
-        latest_apk_url = get_latest_youtube_apk_url()
-        if latest_apk_url:
-            print(f"::set-output name=apk_url::{latest_apk_url}")
-        EOF
-
-    - name: Download YouTube APK
-      run: |
-        wget "https://dw.uptodown.net/dwn/hrCxp4-Fn7gLw6BwT9RSLdrb9jaRK7PWydZ7Qax3jIXKWXKJFIyS4SejhH0vuf_aQHKpezP0q5ZOYYGoX5wSGZ1yd9LPJW5I3fBeGeouR30YujibbivsZ37jITnKIkzM/h4hNmnz8lk9OYVCztsn7tjOwon6ua6F3FO6Nv5k5RTuDTUsfJF8bsW4kg-CaJJmCrQDml1Lga6CmX6EsuH9mNZ_d9rSTUsqQm0zqC6a_nNymHOVRR_aclQAvy5xMjoJU/uuB63xTXAfZ36-qlJcgs38zfXU0BI-5mJW5c_dmdrz-KWb7R2-xBu_va8xgygfoC6M2CztKRfuJoVXczBVEbKQ==/youtube-19-47-39.apk" -O youtube.apk
-
-    - name: Download ReVanced CLI, Patches, and Integrations
-      run: |
-        wget https://github.com/ReVanced/revanced-cli/releases/latest/download/revanced-cli.jar -O revanced-cli.jar
-        wget https://github.com/ReVanced/revanced-patches/releases/latest/download/patches-latest.rvp -O revanced-patches.rvp
-        wget https://github.com/ReVanced/revanced-integrations/releases/latest/download/app-release-unsigned.apk -O integrations.apk
-
-    - name: Patch YouTube APK
-      run: |
-        java -jar revanced-cli.jar \
+      # Patch YouTube APK
+      - name: Patch YouTube
+        run: |
+          java -jar revanced-cli.jar \
             -m integrations.apk \
-            -b revanced-patches.rvp \
+            -b revanced-patches.jar \
             -a youtube.apk \
             -o youtube-revanced.apk
 
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      with:
-        tag_name: "youtube-revanced-$(date +%Y%m%d)"
-        release_name: "YouTube ReVanced $(date +%Y-%m-%d)"
-        draft: false
-        prerelease: false
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Create a GitHub Release
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ github.event.inputs.release_tag }}
+          release_name: "ReVanced YouTube Build - ${{ github.event.inputs.release_tag }}"
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Upload APK to Release
-      uses: actions/upload-release-asset@v1
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: youtube-revanced.apk
-        asset_name: youtube-revanced.apk
-        asset_content_type: application/vnd.android.package-archive
+      # Upload APK to the Release
+      - name: Upload APK to Release
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: youtube-revanced.apk
+          asset_name: youtube-revanced-${{ github.event.inputs.release_tag }}.apk
+          asset_content_type: application/vnd.android.package-archive
