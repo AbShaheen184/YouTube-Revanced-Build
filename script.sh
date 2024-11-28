@@ -21,9 +21,9 @@ get_uptodown_version() {
     echo "Fetching: $url"
     html_content=$(req -q "$url")
 
-    # Debug: Print raw HTML content (you can comment this out after debugging)
+    # Debug: Print the full HTML content (you can comment this out after debugging)
     echo "Raw HTML content:"
-    echo "$html_content" | head -n 20  # Print the first 20 lines for inspection
+    echo "$html_content"  # Print entire HTML content for inspection
 
     # Relaxed version extraction (looking for version pattern)
     version=$(echo "$html_content" | grep -oP 'class="version">\K[^<]+' | head -n 1)
