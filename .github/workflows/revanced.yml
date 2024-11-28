@@ -47,11 +47,10 @@ jobs:
       - name: Patch YouTube
         run: |
           java -jar revanced-cli.jar \
-            -m integrations.apk \
-            -b revanced-patches.jar \
-            -a youtube.apk \
-            -o youtube-revanced.apk
-
+            --patch revanced-patches.jar \
+            -o youtube-revanced.apk \
+            -a youtube.apk
+            
       # Create a GitHub Release
       - name: Create Release
         id: create_release
