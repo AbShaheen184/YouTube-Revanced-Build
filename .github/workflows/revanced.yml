@@ -6,7 +6,7 @@ on:
       apk_url:
         description: "URL to download YouTube APK"
         required: true
-        default: "https://www.apkmirror.com/wp-content/themes/APKMirror/download.php?id=7758988&key=0698aee15cccd3b93909e30bdb00122a417f1a75&forcebaseapk=true"
+        default: "https://example.com/path-to-youtube-apk"
       release_tag:
         description: "Tag for the release (e.g., v1.0.0)"
         required: true
@@ -28,16 +28,14 @@ jobs:
           distribution: 'temurin'
 
       # Download ReVanced CLI
-      
       - name: Download ReVanced CLI
         run: |
-          LATEST_VERSION=$(curl -s https://api.github.com/repos/ReVanced/revanced-cli/releases/latest | grep '"tag_name":' | cut -d '"' -f 4)
-          wget https://github.com/ReVanced/revanced-cli/releases/download/$LATEST_VERSION/revanced-cli.jar -O revanced-cli.jar
+          wget https://github.com/ReVanced/revanced-cli/releases/latest/download/revanced-cli.jar -O revanced-cli.jar
 
       # Download Patches and Integrations
       - name: Download Patches and Integrations
         run: |
-          wget https://github.com/ReVanced/revanced-patches/releases/latest/download/revanced-patches.jar -O revanced-patches.jar
+          wget https://github.com/ReVanced/revanced-patches/releases/latest/download/patches-latest.rvp -O revanced-patches.rvp
           wget https://github.com/ReVanced/revanced-integrations/releases/latest/download/app-release-unsigned.apk -O integrations.apk
 
       # Download YouTube APK (from input)
@@ -50,7 +48,7 @@ jobs:
         run: |
           java -jar revanced-cli.jar \
             -m integrations.apk \
-            -b revanced-patches.jar \
+            -b revanced-patches.rvp \
             -a youtube.apk \
             -o youtube-revanced.apk
 
