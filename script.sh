@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# Function to send a request with headers to simulate a browser request
 req() {
     wget --header="User-Agent: Mozilla/5.0 (Android 13; Mobile; rv:125.0) Gecko/125.0 Firefox/125.0" \
          --header="Content-Type: application/octet-stream" \
@@ -11,43 +12,40 @@ req() {
          --keep-session-cookies --timeout=30 -nv -O "$@"
 }
 
-get_latest_version() {
-    grep -Evi 'alpha|beta' | grep -oPi '\b\d+(\.\d+)+(?:\-\w+)?(?:\.\d+)?(?:\.\w+)?\b' | sort -ur | awk 'NR==1'
+# Fetch the latest version of the APK from Uptodown
+get_uptodown_version() {
+    # URL of the YouTube version page on Uptodown
+    url="https://youtube.en.uptodown.com/android/versions"
+
+    # Extract the latest version number (adjust regex if necessary)
+    version=$(req -q "$url" | grep -oP 'class="version">\K[^<]+' | head -n 1)
+    echo "$version"
 }
 
-get_apkmirror_version() {
-    grep 'fontBlack' | sed -n 's/.*>\(.*\)<\/a> <\/h5>.*/\1/p' | sed 20q
+# Function to download APK from Uptodown based on version
+download_apk_from_uptodown() {
+    name="$1"  # Example: "youtube"
+    package="$2"  # Example: "com.google.android.youtube"
+
+    # Get the latest version
+    version=$(get_uptodown_version)
+
+    # Construct the URL for the download page based on version
+    url="https://$name.en.uptodown.com/android/versions"
+    
+    # Find the correct download URL based on version
+    download_url=$(req -q "$url" | grep -oP 'data-url="([^"]*)"' | grep "$version" | head -n 1)
+    
+    # If a download URL is found, extract the direct link
+    if [[ -n "$download_url" ]]; then
+        download_url="https://dw.uptodown.com/dwn/$(echo $download_url | sed -n 's/.*data-url="\([^"]*\)".*/\1/p')"
+        
+        # Download the APK
+        req "$name-v$version.apk" "$download_url"
+    else
+        echo "Failed to find the download URL for version $version"
+    fi
 }
 
-apkmirror() {
-    org="$1" name="$2" package="$3" arch="$4"
-
-    # Fetch the latest version
-    url="https://www.apkmirror.com/uploads/?appcategory=$name"
-    version="$(req - $url | get_apkmirror_version | get_latest_version)"
-    echo "Latest version found: $version"
-
-    # Construct version-specific page URL
-    url="https://www.apkmirror.com/apk/$org/$name/$name-${version//./-}-release"
-    echo "Fetching variant details from: $url"
-
-    # Extract architecture-specific APK link
-    variant_url="https://www.apkmirror.com$(req - $url | grep '>nodpi<' -B15 | grep '>'$arch'<' -B13 | grep '>APK<' -B5 \
-        | perl -ne 'print "$1\n" if /.*href="([^"]*download\/)".*/ && ++$i == 1;')"
-    echo "Variant page URL: $variant_url"
-
-    # Extract the actual download URL
-    download_url="https://www.apkmirror.com$(req - $variant_url | perl -ne 'print "$1\n" if /.*href="([^"]*key=[^"]*)".*/')"
-    download_url="https://www.apkmirror.com$(req - $download_url | perl -ne 's/amp;//g; print "$1\n" if /.*href="([^"]*key=[^"]*)".*/')"
-    echo "Download URL: $download_url"
-
-    # Download the APK
-    req "$name-v$version.apk" "$download_url"
-    echo "APK downloaded: $name-v$version.apk"
-}
-
-# Usage: Download YouTube APK for ARM64-v8a
-apkmirror "google-inc" \
-          "youtube" \
-          "com.google.android.youtube" \
-          "arm64-v8a"
+# Example usage
+download_apk_from_uptodown "youtube" "com.google.android.youtube"
