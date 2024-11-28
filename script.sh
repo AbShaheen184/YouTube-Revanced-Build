@@ -12,13 +12,22 @@ req() {
          --keep-session-cookies --timeout=30 -nv -O "$@"
 }
 
-# Get the latest APK version of a specific app from Uptodown
+# Function to get the latest APK version from Uptodown and print HTML for debugging
 get_uptodown_version() {
     name="$1"
     url="https://$name.en.uptodown.com/android/versions"
     
-    # Extract the latest version number by matching the version tag
-    version=$(req -q "$url" | grep -oP 'class="version">\K[^<]+' | head -n 1)
+    # Fetch the versions page
+    echo "Fetching: $url"
+    html_content=$(req -q "$url")
+
+    # Debug: Print raw HTML content (you can comment this out after debugging)
+    echo "Raw HTML content:"
+    echo "$html_content" | head -n 20  # Print the first 20 lines for inspection
+
+    # Relaxed version extraction (looking for version pattern)
+    version=$(echo "$html_content" | grep -oP 'class="version">\K[^<]+' | head -n 1)
+    echo "Extracted version: $version"
     echo "$version"
 }
 
@@ -29,6 +38,12 @@ download_apk_from_uptodown() {
 
     # Get the latest version of the app
     version=$(get_uptodown_version "$name")
+
+    # If the version is not found, exit the script
+    if [ -z "$version" ]; then
+        echo "Version not found for $name."
+        exit 1
+    fi
 
     # Construct the version URL
     version_url="https://$name.en.uptodown.com/android/versions"
