@@ -49,8 +49,8 @@ jobs:
           java -jar revanced-cli.jar \
             patch \
             -p revanced-patches.jar \
+              youtube.apk
             -o youtube-revanced.apk \
-            -a youtube.apk
             
       # Create a GitHub Release
       - name: Create Release
